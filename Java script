@@ -1,0 +1,116 @@
+// ---------- Data ----------
+const clubs = [
+  { id: 1, name: "Coding Club", category: "Technical", desc: "Hackathons, web development and coding contests.", head: "Arun Kumar" },
+  { id: 2, name: "Robotics Club", category: "Technical", desc: "Build and program robots and IoT projects.", head: "Divya R" },
+  { id: 3, name: "Music Club", category: "Cultural", desc: "Singing, instruments and stage performances.", head: "Karthik S" },
+  { id: 4, name: "Dance Club", category: "Cultural", desc: "Classical and western dance practice sessions.", head: "Meena P" },
+  { id: 5, name: "Cricket Club", category: "Sports", desc: "Practice matches and inter-college tournaments.", head: "Vijay M" },
+  { id: 6, name: "NSS Club", category: "Social", desc: "Community service and awareness drives.", head: "Priya L" }
+];
+
+// ---------- Local Storage helpers ----------
+const load = (key, fallback) => JSON.parse(localStorage.getItem(key)) || fallback;
+const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+
+let member = load("member", null);          // registered member
+let memberships = load("memberships", []);  // [clubId, ...]
+let events = load("events", [
+  { title: "Web Dev Workshop", clubId: 1, date: "2026-11-05" },
+  { title: "Annual Music Night", clubId: 3, date: "2026-11-12" }
+]);
+
+// ---------- Display clubs with search & filter ----------
+function renderClubs() {
+  const text = document.getElementById("searchInput").value.toLowerCase();
+  const cat = document.getElementById("categoryFilter").value;
+  const list = clubs.filter(c => c.name.toLowerCase().includes(text) && (cat === "All" || c.category === cat));
+  const box = document.getElementById("clubList");
+  if (!list.length) { box.innerHTML = "<p>No clubs found.</p>"; return; }
+  box.innerHTML = list.map(c => {
+    const joined = memberships.includes(c.id);
+    return `<div class="card">
+      <h3>${c.name}</h3><span class="tag">${c.category}</span>
+      <p>${c.desc}</p><p><b>Head:</b> ${c.head}</p>
+      <button class="btn ${joined ? 'leave' : ''}" onclick="toggleClub(${c.id})">${joined ? 'Leave Club' : 'Join Club'}</button>
+    </div>`;
+  }).join("");
+}
+
+// ---------- Registration with validation ----------
+document.getElementById("regForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  const rules = {
+    name: [/^[A-Za-z ]{3,}$/, "Enter a valid name (min 3 letters)"],
+    email: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Enter a valid email"],
+    dept: [/^.{2,}$/, "Department is required"],
+    phone: [/^[6-9]\d{9}$/, "Enter a valid 10-digit phone number"]
+  };
+  let valid = true;
+  for (const f in rules) {
+    const ok = rules[f][0].test(v(f));
+    document.getElementById(f + "Err").textContent = ok ? "" : rules[f][1];
+    if (!ok) valid = false;
+  }
+  if (!valid) return;
+  member = { name: v("name"), email: v("email"), dept: v("dept"), phone: v("phone") };
+  save("member", member);
+  document.getElementById("regMsg").textContent = "Registered successfully, " + member.name + "!";
+  e.target.reset();
+  renderMembers();
+});
+
+// ---------- Join / Leave ----------
+function toggleClub(id) {
+  if (!member) { alert("Please register first!"); location.hash = "#register"; return; }
+  memberships = memberships.includes(id) ? memberships.filter(x => x !== id) : [...memberships, id];
+  save("memberships", memberships);
+  renderClubs(); renderMembers();
+}
+
+// ---------- Display members of a club ----------
+function renderMembers() {
+  const sel = document.getElementById("memberClub");
+  const id = Number(sel.value);
+  const ul = document.getElementById("memberList");
+  const sample = ["Arun Kumar", "Divya R", "Karthik S"];
+  let names = sample.map(n => n + " (Member)");
+  if (member && memberships.includes(id)) names.unshift(`${member.name} - ${member.dept} (You)`);
+  ul.innerHTML = names.map(n => `<li>${n}</li>`).join("");
+}
+
+// ---------- Events ----------
+document.getElementById("eventForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const title = document.getElementById("evTitle").value.trim();
+  const clubId = Number(document.getElementById("evClub").value);
+  const date = document.getElementById("evDate").value;
+  const err = document.getElementById("evErr");
+  if (!title || !date) { err.textContent = "Enter event title and date"; return; }
+  err.textContent = "";
+  events.push({ title, clubId, date });
+  save("events", events);
+  e.target.reset();
+  renderEvents();
+});
+
+function renderEvents() {
+  const today = new Date().toISOString().split("T")[0];
+  const upcoming = events.filter(ev => ev.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const ul = document.getElementById("eventList");
+  ul.innerHTML = upcoming.length
+    ? upcoming.map(ev => `<li><b>${ev.title}</b> - ${clubs.find(c => c.id === ev.clubId).name} | Date: ${ev.date}</li>`).join("")
+    : "<li>No upcoming events.</li>";
+}
+
+// ---------- Init ----------
+function fillClubDropdowns() {
+  const opts = clubs.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+  document.getElementById("memberClub").innerHTML = opts;
+  document.getElementById("evClub").innerHTML = opts;
+}
+document.getElementById("searchInput").addEventListener("input", renderClubs);
+document.getElementById("categoryFilter").addEventListener("change", renderClubs);
+document.getElementById("memberClub").addEventListener("change", renderMembers);
+
+fillClubDropdowns(); renderClubs(); renderMembers(); renderEvents();
