@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Club Management Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>College Club Management Portal</h1>
+    <nav>
+      <a href="#clubs">Clubs</a>
+      <a href="#register">Register</a>
+      <a href="#members">Members</a>
+      <a href="#events">Events</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Clubs -->
+    <section id="clubs">
+      <h2>Explore Clubs</h2>
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="Search clubs by name...">
+        <select id="categoryFilter">
+          <option value="All">All Categories</option>
+          <option>Technical</option>
+          <option>Cultural</option>
+          <option>Sports</option>
+          <option>Social</option>
+        </select>
+      </div>
+      <div id="clubList" class="grid"></div>
+    </section>
+
+    <!-- Registration -->
+    <section id="register">
+      <h2>Member Registration</h2>
+      <form id="regForm" novalidate>
+        <div class="row">
+          <div><label>Full Name</label><input type="text" id="name" placeholder="Enter your name"><small class="err" id="nameErr"></small></div>
+          <div><label>Email</label><input type="email" id="email" placeholder="you@college.edu"><small class="err" id="emailErr"></small></div>
+        </div>
+        <div class="row">
+          <div><label>Department</label><input type="text" id="dept" placeholder="e.g. CSE"><small class="err" id="deptErr"></small></div>
+          <div><label>Phone</label><input type="text" id="phone" placeholder="10-digit number"><small class="err" id="phoneErr"></small></div>
+        </div>
+        <button type="submit" class="btn">Register</button>
+        <span id="regMsg" class="ok"></span>
+      </form>
+    </section>
+
+    <!-- Members -->
+    <section id="members">
+      <h2>Club Members</h2>
+      <select id="memberClub"></select>
+      <ul id="memberList" class="plain"></ul>
+    </section>
+
+    <!-- Events -->
+    <section id="events">
+      <h2>Event Announcements</h2>
+      <form id="eventForm" class="row">
+        <input type="text" id="evTitle" placeholder="Event title">
+        <select id="evClub"></select>
+        <input type="date" id="evDate">
+        <button type="submit" class="btn">Add Event</button>
+      </form>
+      <small class="err" id="evErr"></small>
+      <h3>Upcoming Events</h3>
+      <ul id="eventList" class="plain"></ul>
+    </section>
+  </main>
+
+  <footer>© 2026 College Club Management Portal</footer>
+  <script src="script.js"></script>
+</body>
+</html>
